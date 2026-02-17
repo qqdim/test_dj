@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey
+    ports:
+      - "6379:6379"
+    restart: always
