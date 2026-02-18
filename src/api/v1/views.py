@@ -1,15 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.db.models import Sum, Count, Avg, Max
-from django.db.models.functions import TruncDay
-from django.shortcuts import render
 from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from orders.models import Order
-from users.models import User
+from core.models import Order
+from core.models import User
 
 
 # Create your views here.
@@ -40,3 +38,31 @@ class CustomersStatisticAPIView(APIView):
             .values("email", "orders_count", "avg_order_price", "last_order_date")
         )
         return Response(queryset)
+
+from django.shortcuts import render
+from rest_framework import generics, filters
+from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from core.models import Order
+from core.serializers import OrderCreateSerializer, OrderListSerializer
+from core.order_service import create_order
+
+# Create your views here.
+class OrderCreateAPIView(generics.CreateAPIView):
+    serializer_class = OrderCreateSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        create_order(
+            user=self.request.user,
+            items=serializer.validated_data["items"]
+        )
+
+class OrderListAPIView(generics.ListAPIView):
+    serializer_class = OrderListSerializer
+    permission_classes = (IsAuthenticated,)
+    queryset = Order.objects.select_related("user").prefetch_related("items")
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filterset_fields = ("status", "created_at")
+    ordering_fields = ("created_at",)
+    ordering = ("-created_at",)

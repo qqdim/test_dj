@@ -1,9 +1,5 @@
-from config.celery import app
 from celery import shared_task
-from datetime import timedelta
-from django.utils import timezone
-from django.db.models import Sum
-from orders.models import Order
+
 
 @shared_task
 def daily_revenue_report():

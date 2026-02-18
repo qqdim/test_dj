@@ -1,5 +1,5 @@
 from django.db import transaction
-from orders.models import Order, OrderItem
+from core.models import Order, OrderItem
 
 
 def create_order(user, items):
@@ -13,7 +13,7 @@ def create_order(user, items):
             quantity = item["quantity"]
             total_price += price * quantity
 
-            order_items.append(OrderItem(# bulk_create
+            order_items.append(OrderItem(
                 order=order,
                 product_name=item["product_name"],
                 price=price,
